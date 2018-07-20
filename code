@@ -1,0 +1,23 @@
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import pandas as pd
+
+url = 'https://www.basketball-reference.com/play-index/psl_finder.cgi?request=1&match=single&per_minute_base=36&per_poss_base=100&type=advanced&season_start=1&season_end=-1&lg_id=NBA&age_min=0&age_max=99&is_playoffs=N&height_min=0&height_max=99&year_min=2018&year_max=2018&shoot_hand=R&birth_country_is=Y&as_comp=gt&as_val=0&pos_is_c=Y&pos_is_cf=Y&c1stat=g&c1comp=gt&c1val=50&c2stat=mp&c2comp=gt&c2val=24&order_by=ws'
+
+html = urlopen(url)
+soup = BeautifulSoup(html, "html.parser")
+
+#right-click and 'inspect element' for the page you wish to scrape 
+# find the tags for the table
+
+column_headers = [th.getText() for th in soup.findAll('tr')[1].findAll('th')[1:30]]
+data_rows = soup.findAll('tr')[2:]
+
+# make a two-dimensional matrix using  list comprehension
+# find all 'td' tags in 'tr' tags that we found in data_rows
+cell_data = [[td.getText() for td in data_rows[i].findAll(['td'])] for i in range(len(data_rows))]
+
+df = pd.DataFrame(cell_data, columns=column_headers)
+
+#save as a .csv
+df.to_csv('nba centers adv.csv')
